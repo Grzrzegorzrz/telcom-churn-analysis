@@ -14,7 +14,7 @@ from sklearn.metrics import (
 )
 from xgboost import XGBClassifier
 
-from telco_churn.config import RANDOM_STATE, TARGET_PP
+from telco_churn.config import CAMPAIGN_TARGET_COUNT, RANDOM_STATE
 
 
 def resample(X_train, y_train, sampling_strategy=1.0, k_neighbors=5, seed=RANDOM_STATE):
@@ -55,7 +55,7 @@ def make_xgb(random_state=RANDOM_STATE, **kwargs) -> XGBClassifier:
     return XGBClassifier(**defaults)
 
 
-def evaluate_topk(y_true, y_proba, k=TARGET_PP) -> dict:
+def evaluate_topk(y_true, y_proba, k=CAMPAIGN_TARGET_COUNT) -> dict:
     """Evaluate predictions where exactly the top-k by probability are positive."""
     y_true = np.asarray(y_true)
     y_proba = np.asarray(y_proba)

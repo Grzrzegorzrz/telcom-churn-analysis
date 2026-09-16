@@ -1,4 +1,4 @@
-"""Retention-campaign economics (goalseeked to the README numbers)."""
+"""Retention-campaign economics (matched to the README numbers)."""
 from __future__ import annotations
 
 import numpy as np

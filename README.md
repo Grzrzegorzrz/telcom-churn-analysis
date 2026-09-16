@@ -70,30 +70,44 @@ Three models were evaluated: Logistic Regression, Random Forest, and XGBoost[cit
 *   **Scaling:** Applied StandardScaler to numerical features[cite: 1].
 
 ### Training Process
-*   Data split: 80% train, 20% test (stratified)[cite: 1].
-*   SMOTE applied only to the training set[cite: 1].
-*   Optimized for F1-score and ROC-AUC[cite: 1].
+*   Data split: 80% train / 20% test, stratified by churn label, `random_state=42` (5,634 train / 1,409 test).
+*   SMOTE applied only on the training set (sampling strategy 1.0, k-neighbors 5).
+*   Final model: Random Forest (150 trees, `class_weight="balanced"`, `max_features="log2"`, `min_samples_leaf=2`).
+*   Campaign targeting: the 470 customers with the highest predicted churn probability on the holdout set (decision threshold 0.454).
+*   Optimization objective: model selection weighted F1-score and ROC-AUC; the final configuration balances predictive strength against the retention-campaign economics (targeting the top 470 customers, 25% retention assumption).
 
 ## Try It Live
 
 Run the Gradio interface locally to enter customer details and get instant churn probability predictions and personalized retention recommendations[cite: 1].
 
 ```bash
-python app.py
+python -m venv .venv
+.venv/bin/pip install -e .
+.venv/bin/python scripts/run_all.py
 ```
 
-Then open http://localhost:7860 in your browser[cite: 1].
-# Installation
+`run_all.py` runs the full pipeline in order: key insights → final training → model comparison → ROI report. Equivalent individual steps:
+
+```bash
+.venv/bin/python scripts/insights_report.py     # data-driven key insights
+.venv/bin/python scripts/train_final.py         # fit the final model, write metrics/predictions
+.venv/bin/python scripts/compare_models.py      # LR / RF / XGBoost comparison table
+.venv/bin/python scripts/roi_report.py          # retention-campaign economics
 ```
 # Clone repository
 git clone [https://github.com/KuldeepChoksi/customer-churn-prediction.git](https://github.com/KuldeepChoksi/customer-churn-prediction.git)
 cd customer-churn-prediction
 
-# Install dependencies
-pip install -r requirements.txt
+All model hyper-parameters are predefined in `src/telco_churn/config.py` (`BEST_RF_CONFIG`, `SMOTE_CONFIG`, `LR_CONFIG`, `XGB_CONFIG`) rather than discovered at runtime, so results are deterministic. The dataset ships in `data/`; no download step is required.
 
-# Download dataset
-python utils/download_data.py
+### Generated artifacts (`outputs/`)
 
-Prerequisites: Python 3.12+ and pip[cite: 1].
-```
+| File | Contents |
+| :--- | :--- |
+| `final_metrics.json` | Final model metrics, confusion matrix, and hyper-parameters |
+| `roi.json` | Full retention-campaign economics |
+| `model_comparison.json` | LR / RF / XGBoost comparison table and settings |
+| `key_insights.json` | Key-insight statistics from the raw data |
+| `predictions.csv` | Per-customer holdout predictions and churn probabilities |
+| `rf_smote_model.joblib`, `scaler.joblib` | Fitted model and scaler for reuse |
+| `feature_names.json` | Final 33-feature list |
